@@ -162,4 +162,17 @@ def train(netG, netD, optimizerG, optimizerD, batch_size, nz, device=torch.devic
   plt.savefig('where you want to save/lr='+ str(lr) +'_epoch='+str(epochs)+'.png')
   
   
+def main():
+  epochs = 20
+  lr = 0.0002
   
+  device = torch.device('cuda')
+  train_loader = load_data()
+  
+  netG = generator(pitch_range).to(device)
+  netD = discriminator(pitch_range).to(device)
+  
+  optimizerD = optim.Adam(netD.parameters(), lr=lr, betas=(0.5, 0.999))
+  optimizerG = optim.Adam(netG.parameters(), lr=lr, betas=(0.5, 0.999)) 
+  
+  train()
