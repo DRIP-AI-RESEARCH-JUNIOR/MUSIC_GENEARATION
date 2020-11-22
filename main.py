@@ -15,7 +15,7 @@ def load_data():
   # TO do -: write this
   return train_loader, val_loader
 
-def train(netG, netD, optG, optD, batch_size, nz, device=torch.device('cuda')):
+def train(netG, netD, optimizerG, optimizerD, batch_size, nz, device=torch.device('cuda')):
   
   fixed_noise = torch.randn(batch_size, nz, device=device)
   netD.train()
@@ -137,6 +137,29 @@ def train(netG, netD, optG, optD, batch_size, nz, device=torch.device('cuda')):
         fake = netG(fixed_noise,prev_data_cpu,chord_cpu,batch_size,pitch_range)
         vutils.save_image(fake.detach(), '%s/fake_samples_epoch_%03d.png' % ('file', epoch), normalize=True)
   
-  if epoch % 5 == 0:
-    print('[{}/{}][{}/{}] Loss_D: {:.4f} Loss_G: {:.4f} D(x): {:.4f} D(G(z)): {:.4f} / {:.4f}'.
-          format(epoch, epochs, i, len(train_loader),errD, errG, D_x, D_G_z1, D_G_z2))
+  average_lossD = (sum_lossD / len(train_loader))
+  average_lossG = (sum_lossG / len(train_loader))
+  average_D_x = (sum_D_x / len(train_loader))
+  average_D_G_z = (sum_D_G_z / len(train_loader))
+  
+  lossD_list.append(average_lossD)
+  lossG_list.append(average_lossG)
+  D_x_list.append(average_D_x)
+  D_G_z_list.append(average_D_G_z)
+  
+  print('==> Epoch: {} Average lossD: {:.10f} average_lossG: {:.10f},average D(x): {:.10f},average D(G(z)): {:.10f} '.format(
+    epoch, average_lossD,average_lossG,average_D_x, average_D_G_z))
+  
+  # Save plot
+  length = lossG_list.shape[0]
+  x = np.linspace(0, length-1, length)
+  x = np.asarray(x)
+  
+  plt.figure()
+  plt.plot(x, lossD_list,label=' lossD',linewidth=1.5)
+  plt.plot(x, lossG_list,label=' lossG',linewidth=1.5)
+  
+  plt.savefig('where you want to save/lr='+ str(lr) +'_epoch='+str(epochs)+'.png')
+  
+  
+  
